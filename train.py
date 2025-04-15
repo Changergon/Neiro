@@ -6,9 +6,11 @@ from torchvision import transforms, models
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
 from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from PIL import Image
+import numpy as np
 
 # --- Удаление пустых папок ---
 def remove_empty_folders(root_dir):
@@ -49,10 +51,11 @@ def get_transforms(train=True):
         ])
 
 # --- Загрузка данных ---
-def load_datasets(train_dir, test_dir):
+def load_datasets(train_dir, val_dir, check_dir):
     train_dataset = ImageFolder(train_dir, transform=get_transforms(train=True), loader=safe_pil_loader)
-    test_dataset = ImageFolder(test_dir, transform=get_transforms(train=False), loader=safe_pil_loader)
-    return train_dataset, test_dataset
+    val_dataset = ImageFolder(val_dir, transform=get_transforms(train=False), loader=safe_pil_loader)
+    check_dataset = ImageFolder(check_dir, transform=get_transforms(train=False), loader=safe_pil_loader)
+    return train_dataset, val_dataset, check_dataset
 
 # --- Инициализация модели ---
 def create_model(num_classes, device):
@@ -87,39 +90,69 @@ def evaluate(model, loader, device):
             total += labels.size(0)
     return 100 * correct / total
 
+# --- Проверка по категориям ---
+def evaluate_per_class(model, loader, class_names, device):
+    model.eval()
+    correct = [0] * len(class_names)
+    total = [0] * len(class_names)
+    with torch.no_grad():
+        for inputs, labels in loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            for label, pred in zip(labels, preds):
+                total[label] += 1
+                if label == pred:
+                    correct[label] += 1
+    for i, class_name in enumerate(class_names):
+        acc = 100 * correct[i] / total[i] if total[i] > 0 else 0
+        print(f"{class_name}: {acc:.2f}%")
+
 # --- Основной цикл ---
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Используемое устройство:", device)
 
     remove_empty_folders(args.train_dir)
-    remove_empty_folders(args.test_dir)
+    remove_empty_folders(args.val_dir)
 
-    train_dataset, test_dataset = load_datasets(args.train_dir, args.test_dir)
+    train_dataset, val_dataset, check_dataset = load_datasets(args.train_dir, args.val_dir, args.check_dir)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size)
+    check_loader = DataLoader(check_dataset, batch_size=args.batch_size)
     num_classes = len(train_dataset.classes)
 
     model = create_model(num_classes, device)
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=args.lr)
+    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=2, verbose=True)
 
     best_accuracy = 0.0
+    patience_counter = 0
+    early_stopping_patience = 4
     losses, accuracies = [], []
 
     for epoch in range(args.epochs):
         print(f"\n--- Эпоха {epoch+1}/{args.epochs} ---")
         avg_loss = train_one_epoch(model, train_loader, criterion, optimizer, device)
-        accuracy = evaluate(model, test_loader, device)
-        print(f"Потери: {avg_loss:.4f}, Точность: {accuracy:.2f}%")
+        accuracy = evaluate(model, val_loader, device)
+        print(f"Потери: {avg_loss:.4f}, Вал. Точность: {accuracy:.2f}%")
 
         losses.append(avg_loss)
         accuracies.append(accuracy)
+
+        scheduler.step(accuracy)
 
         if accuracy > best_accuracy:
             best_accuracy = accuracy
             torch.save(model.state_dict(), args.model_path)
             print(f"✅ Лучшая модель сохранена ({best_accuracy:.2f}%)")
+            patience_counter = 0
+        else:
+            patience_counter += 1
+            if patience_counter >= early_stopping_patience:
+                print("⏹️ Ранняя остановка: точность не улучшалась несколько эпох подряд.")
+                break
 
     # --- Графики ---
     plt.figure(figsize=(10, 5))
@@ -133,11 +166,16 @@ def main(args):
     plt.savefig("train_stats.png")
     print("Графики сохранены в train_stats.png")
 
+    # --- Проверка по check-набору ---
+    print("\n--- Проверка на контрольном наборе (check) ---")
+    model.load_state_dict(torch.load(args.model_path))
+    evaluate_per_class(model, check_loader, check_dataset.classes, device)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default="C:/Users/Дмитрий/Desktop/rp2k_dataset/all")
-    parser.add_argument('--train_dir', type=str, default="C:/Users/Дмитрий/Desktop/rp2k_dataset/all/train")
-    parser.add_argument('--test_dir', type=str, default="C:/Users/Дмитрий/Desktop/rp2k_dataset/all/test")
+    parser.add_argument('--train_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/train")
+    parser.add_argument('--val_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/val")
+    parser.add_argument('--check_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/check")
     parser.add_argument('--model_path', type=str, default="best_model.pth")
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--epochs', type=int, default=15)
