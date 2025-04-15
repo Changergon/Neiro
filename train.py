@@ -82,7 +82,7 @@ def evaluate(model, loader, device):
     model.eval()
     correct, total = 0, 0
     with torch.no_grad():
-        for inputs, labels in loader:
+        for inputs, labels in tqdm(loader, desc="Валидация"):
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
@@ -96,7 +96,7 @@ def evaluate_per_class(model, loader, class_names, device):
     correct = [0] * len(class_names)
     total = [0] * len(class_names)
     with torch.no_grad():
-        for inputs, labels in loader:
+        for inputs, labels in tqdm(loader, desc="Проверка"):
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
@@ -104,8 +104,13 @@ def evaluate_per_class(model, loader, class_names, device):
                 total[label] += 1
                 if label == pred:
                     correct[label] += 1
+
+    results = []
     for i, class_name in enumerate(class_names):
         acc = 100 * correct[i] / total[i] if total[i] > 0 else 0
+        results.append((class_name, acc))
+
+    for class_name, acc in sorted(results, key=lambda x: x[1], reverse=True):
         print(f"{class_name}: {acc:.2f}%")
 
 # --- Основной цикл ---
@@ -125,7 +130,7 @@ def main(args):
     model = create_model(num_classes, device)
     criterion = nn.CrossEntropyLoss()
     optimizer = Adam(model.parameters(), lr=args.lr)
-    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=2, verbose=True)
+    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=2)
 
     best_accuracy = 0.0
     patience_counter = 0
@@ -169,6 +174,8 @@ def main(args):
     # --- Проверка по check-набору ---
     print("\n--- Проверка на контрольном наборе (check) ---")
     model.load_state_dict(torch.load(args.model_path))
+    total_check_acc = evaluate(model, check_loader, device)
+    print(f"\n📊 Общая точность на контрольном наборе: {total_check_acc:.2f}%")
     evaluate_per_class(model, check_loader, check_dataset.classes, device)
 
 if __name__ == "__main__":
