@@ -3,11 +3,8 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 import matplotlib.pyplot as plt
 import numpy as np
-import torch
-import torch.nn as nn
 from PIL import Image
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from torch.optim import Adam
@@ -40,14 +37,35 @@ class ChannelAttention(nn.Module):
         out = avg_out + max_out
         return self.sigmoid(out)
 
-class CBAM(nn.Module):
-    def __init__(self, in_planes):
+
+class SpatialAttention(nn.Module):
+    def __init__(self, kernel_size=7):
         super().__init__()
-        self.ca = ChannelAttention(in_planes)
+        padding = kernel_size // 2
+        self.conv = nn.Conv2d(2, 1, kernel_size, padding=padding, bias=False)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        avg_out = torch.mean(x, dim=1, keepdim=True)
+        max_out, _ = torch.max(x, dim=1, keepdim=True)
+        x_cat = torch.cat([avg_out, max_out], dim=1)
+        attention = self.sigmoid(self.conv(x_cat))
+        return attention
+
+
+class CBAM(nn.Module):
+    def __init__(self, in_planes, ratio=16, kernel_size=7):
+        super().__init__()
+        self.ca = ChannelAttention(in_planes, ratio)
+        self.sa = SpatialAttention(kernel_size)
+        self.norm = nn.BatchNorm2d(in_planes)  # Нормализация после CBAM
 
     def forward(self, x):
         x = x * self.ca(x)
+        x = x * self.sa(x)
+        x = self.norm(x)
         return x
+
 
 # DropBlock (более агрессивный аналог Dropout для ConvNet)
 class DropBlock2D(nn.Module):
@@ -164,13 +182,22 @@ def load_datasets(train_dir, val_dir, check_dir):
 class ImprovedCNN(nn.Module):
     def __init__(self, num_classes=9):
         super().__init__()
-        self.block1 = self.conv_block(3, 64)
-        self.block2 = self.conv_block(64, 128)
-        self.block3 = self.conv_block(128, 256)
-        self.block4 = self.conv_block(256, 512)
 
-        self.cbam = CBAM(512)
-        self.dropblock = DropBlock2D(drop_prob=0.1)
+        self.block1 = self.conv_block(3, 64)
+        self.cbam1 = CBAM(64)
+        self.drop1 = DropBlock2D(drop_prob=0.1)
+
+        self.block2 = self.conv_block(64, 128)
+        self.cbam2 = CBAM(128)
+        self.drop2 = DropBlock2D(drop_prob=0.1)
+
+        self.block3 = self.conv_block(128, 256)
+        self.cbam3 = CBAM(256)
+        self.drop3 = DropBlock2D(drop_prob=0.1)
+
+        self.block4 = self.conv_block(256, 512)
+        self.cbam4 = CBAM(512)
+        self.drop4 = DropBlock2D(drop_prob=0.1)
 
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, num_classes)
@@ -187,17 +214,46 @@ class ImprovedCNN(nn.Module):
         )
 
     def forward(self, x):
-        x = self.block1(x)  # 64x112x112
-        x = self.block2(x)  # 128x56x56
-        x = self.block3(x)  # 256x28x28
-        x = self.block4(x)  # 512x14x14
+        x = self.block1(x)
+        x = self.apply_cbam_and_drop(x, 64)
 
-        x = self.cbam(x)    # attention
-        x = self.dropblock(x)
+        x = self.block2(x)
+        x = self.apply_cbam_and_drop(x, 128)
 
-        x = self.pool(x)    # 512x1x1
-        x = x.view(x.size(0), -1)  # Flatten
+        x = self.block3(x)
+        x = self.apply_cbam_and_drop(x, 256)
+
+        x = self.block4(x)
+        x = self.apply_cbam_and_drop(x, 512)
+
+        x = self.pool(x)
+        x = x.view(x.size(0), -1)
         return self.fc(x)
+
+    def apply_cbam_and_drop(self, x, channels):
+        # LayerNorm with dynamic size and move to same device as input
+        norm = nn.LayerNorm(x.size()[1:]).to(x.device)
+        x = norm(x)
+
+        # Apply CBAM and DropBlock based on training/evaluation mode
+        if channels == 64:
+            x = self.cbam1(x)
+            if self.training:
+                x = self.drop1(x)
+        elif channels == 128:
+            x = self.cbam2(x)
+            if self.training:
+                x = self.drop2(x)
+        elif channels == 256:
+            x = self.cbam3(x)
+            if self.training:
+                x = self.drop3(x)
+        elif channels == 512:
+            x = self.cbam4(x)
+            if self.training:
+                x = self.drop4(x)
+
+        return x
 
 
 # --- Обучение ---
@@ -415,9 +471,9 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', type=str, default="best_model.pth")
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--lr', type=float, default=0.001)
+    parser.add_argument('--lr', type=float, default=0.0008)
     parser.add_argument('--loss', type=str, choices=['ce', 'focal'], default='focal')
-    parser.add_argument('--cutmix_prob', type=float, default=0.2)
+    parser.add_argument('--cutmix_prob', type=float, default=0.5)
     parser.add_argument('--patience', type=int, default=5, help='Patience для EarlyStopping')
     args = parser.parse_args()
 

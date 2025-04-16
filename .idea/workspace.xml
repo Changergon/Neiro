@@ -4,10 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b3d3765f-06b8-41e8-8b49-974a8ab244f4" name="Changes" comment="Модель обучилась Потери: 1.8324, Вал. Точность: 55.89%">
+    <list default="true" id="b3d3765f-06b8-41e8-8b49-974a8ab244f4" name="Changes" comment="Модель обучилась &#10;Эпоха 30 / 50&#10;📉 Средняя потеря (loss):        1.2396&#10;✅ Точность на валидации:        43.42%&#10;🔁 Текущий learning rate:        0.000031&#10;💾 Лучшая модель сохранена!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/confusion_matrix.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/train_stats.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744757322.DESKTOP-AF3RTVT.17720.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744757383.DESKTOP-AF3RTVT.1984.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744757889.DESKTOP-AF3RTVT.18072.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744757908.DESKTOP-AF3RTVT.12208.0" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_stats.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +75,7 @@
       <option name="presentableId" value="Default" />
       <updated>1744704577643</updated>
       <workItem from="1744704579075" duration="21000" />
-      <workItem from="1744704604144" duration="34342000" />
+      <workItem from="1744704604144" duration="48812000" />
     </task>
     <task id="LOCAL-00001" summary="Модель обучилась acc=36,86%&#10;loss=0.234">
       <option name="closed" value="true" />
@@ -96,7 +101,23 @@
       <option name="project" value="LOCAL" />
       <updated>1744722191505</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Модель обучилась &#10;Эпоха 30 / 50&#10;📉 Средняя потеря (loss):        1.2396&#10;✅ Точность на валидации:        43.42%&#10;🔁 Текущий learning rate:        0.000031&#10;💾 Лучшая модель сохранена!">
+      <option name="closed" value="true" />
+      <created>1744789367989</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1744789367989</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Модель обучилась &#10;Эпоха 30 / 50&#10;📉 Средняя потеря (loss):        1.2396&#10;✅ Точность на валидации:        43.42%&#10;🔁 Текущий learning rate:        0.000031&#10;💾 Лучшая модель сохранена!">
+      <option name="closed" value="true" />
+      <created>1744790742065</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1744790742065</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,9 +138,10 @@
     <MESSAGE value="Модель обучилась acc=36,86%&#10;loss=0.234" />
     <MESSAGE value="Модель обучилась acc=52,45%&#10;loss=1.4394" />
     <MESSAGE value="Модель обучилась Потери: 1.8324, Вал. Точность: 55.89%" />
-    <option name="LAST_COMMIT_MESSAGE" value="Модель обучилась Потери: 1.8324, Вал. Точность: 55.89%" />
+    <MESSAGE value="Модель обучилась &#10;Эпоха 30 / 50&#10; Средняя потеря (loss):        1.2396&#10;✅ Точность на валидации:        43.42%&#10; Текущий learning rate:        0.000031&#10; Лучшая модель сохранена!" />
+    <option name="LAST_COMMIT_MESSAGE" value="Модель обучилась &#10;Эпоха 30 / 50&#10; Средняя потеря (loss):        1.2396&#10;✅ Точность на валидации:        43.42%&#10; Текущий learning rate:        0.000031&#10; Лучшая модель сохранена!" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/PythonProject$train.coverage" NAME="train Coverage Results" MODIFIED="1744757905549" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PythonProject$train.coverage" NAME="train Coverage Results" MODIFIED="1744792848678" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
