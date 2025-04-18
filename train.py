@@ -14,6 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from tqdm import tqdm
+from pathlib import Path
 
 
 
@@ -58,11 +59,11 @@ class CBAM(nn.Module):
         super().__init__()
         self.ca = ChannelAttention(in_planes, ratio)
         self.sa = SpatialAttention(kernel_size)
-        self.norm = nn.BatchNorm2d(in_planes)  # Нормализация после CBAM
+        self.norm = nn.BatchNorm2d(in_planes)
 
     def forward(self, x):
-        x = x * self.ca(x)
-        x = x * self.sa(x)
+        x = x * self.ca(x)  # Call self.ca as a function
+        x = x * self.sa(x)  # Call self.sa as a function
         x = self.norm(x)
         return x
 
@@ -179,39 +180,40 @@ def load_datasets(train_dir, val_dir, check_dir):
     return train_dataset, val_dataset, check_dataset
 
 # Улучшенная CNN модель
+def conv_block(in_channels, out_channels):
+    return nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, 3, padding=1),
+        nn.BatchNorm2d(out_channels),
+        nn.ReLU(),
+        nn.Conv2d(out_channels, out_channels, 3, padding=1),
+        nn.BatchNorm2d(out_channels),
+        nn.ReLU(),
+        nn.MaxPool2d(2)
+    )
+
+
 class ImprovedCNN(nn.Module):
     def __init__(self, num_classes=9):
         super().__init__()
 
-        self.block1 = self.conv_block(3, 64)
+        self.block1 = conv_block(3, 64)
         self.cbam1 = CBAM(64)
         self.drop1 = DropBlock2D(drop_prob=0.1)
 
-        self.block2 = self.conv_block(64, 128)
+        self.block2 = conv_block(64, 128)
         self.cbam2 = CBAM(128)
         self.drop2 = DropBlock2D(drop_prob=0.1)
 
-        self.block3 = self.conv_block(128, 256)
+        self.block3 = conv_block(128, 256)
         self.cbam3 = CBAM(256)
         self.drop3 = DropBlock2D(drop_prob=0.1)
 
-        self.block4 = self.conv_block(256, 512)
+        self.block4 = conv_block(256, 512)
         self.cbam4 = CBAM(512)
         self.drop4 = DropBlock2D(drop_prob=0.1)
 
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512, num_classes)
-
-    def conv_block(self, in_channels, out_channels):
-        return nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, 3, padding=1),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
-            nn.Conv2d(out_channels, out_channels, 3, padding=1),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
-            nn.MaxPool2d(2)
-        )
 
     def forward(self, x):
         x = self.block1(x)
@@ -231,11 +233,9 @@ class ImprovedCNN(nn.Module):
         return self.fc(x)
 
     def apply_cbam_and_drop(self, x, channels):
-        # LayerNorm with dynamic size and move to same device as input
         norm = nn.LayerNorm(x.size()[1:]).to(x.device)
         x = norm(x)
 
-        # Apply CBAM and DropBlock based on training/evaluation mode
         if channels == 64:
             x = self.cbam1(x)
             if self.training:
@@ -465,15 +465,15 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--train_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/train")
+    parser.add_argument('--train_dir', type=Path, default=Path("C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/train"))
     parser.add_argument('--val_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/val")
     parser.add_argument('--check_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/check")
     parser.add_argument('--model_path', type=str, default="best_model.pth")
     parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--lr', type=float, default=0.0008)
+    parser.add_argument('--epochs', type=int, default=60)
+    parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--loss', type=str, choices=['ce', 'focal'], default='focal')
-    parser.add_argument('--cutmix_prob', type=float, default=0.5)
+    parser.add_argument('--cutmix_prob', type=float, default=0.3)
     parser.add_argument('--patience', type=int, default=5, help='Patience для EarlyStopping')
     args = parser.parse_args()
 
