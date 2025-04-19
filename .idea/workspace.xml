@@ -5,16 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b3d3765f-06b8-41e8-8b49-974a8ab244f4" name="Changes" comment="Модель обучилась &#10;========================= Эпоха 48 / 50 =========================&#10;Обучение: 100%|██████████| 219/219 [06:15&lt;00:00,  1.72s/it]&#10;Валидация: 100%|██████████| 57/57 [00:10&lt;00:00,  5.56it/s]&#10;📉 Средняя потеря (loss):        1.1275&#10;✅ Точность на валидации:        52.18%&#10;🔁 Текущий learning rate:        0.000006&#10;💾 Лучшая модель сохранена!&#10;============================================================">
-      <change beforePath="$PROJECT_DIR$/.idea/PythonProject.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/PythonProject.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Translate.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cluster_and_expand.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mapping.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744792599.DESKTOP-AF3RTVT.6276.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744792851.DESKTOP-AF3RTVT.16284.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744909572.DESKTOP-AF3RTVT.19900.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744909733.DESKTOP-AF3RTVT.13584.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744909763.DESKTOP-AF3RTVT.8080.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744909777.DESKTOP-AF3RTVT.4408.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744909933.DESKTOP-AF3RTVT.6344.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/train_logs/events.out.tfevents.1744911229.DESKTOP-AF3RTVT.9592.0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +32,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Changergon/Neiro.git&quot;,
-    &quot;accountId&quot;: &quot;f708d09f-29e7-4600-956e-b87de0c3c6dd&quot;
+    &quot;accountId&quot;: &quot;8786f2e1-e84e-4837-915b-ea52dc64bfb7&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -49,9 +47,10 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;Python.train.executor&quot;: &quot;Run&quot;,
+    &quot;Python.train_script.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -64,8 +63,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
-        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-PY-251.23774.444" />
+        <option value="bundled-python-sdk-890ed5b35930-d9c5bdb153f4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.23774.444" />
       </set>
     </attachedChunks>
   </component>
@@ -84,6 +83,9 @@
       <workItem from="1744909381225" duration="96000" />
       <workItem from="1744909481609" duration="11000" />
       <workItem from="1744909515324" duration="10895000" />
+      <workItem from="1745058624943" duration="141000" />
+      <workItem from="1745058772756" duration="9000" />
+      <workItem from="1745058786734" duration="7000" />
     </task>
     <task id="LOCAL-00001" summary="Модель обучилась acc=36,86%&#10;loss=0.234">
       <option name="closed" value="true" />
@@ -150,6 +152,7 @@
     <option name="LAST_COMMIT_MESSAGE" value="Модель обучилась &#10;Эпоха 30 / 50&#10; Средняя потеря (loss):        1.2396&#10;✅ Точность на валидации:        43.42%&#10; Текущий learning rate:        0.000031&#10; Лучшая модель сохранена!" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/PythonProject$train.coverage" NAME="train Coverage Results" MODIFIED="1744911226751" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PythonProject$train.coverage" NAME="train Coverage Results" MODIFIED="1745057953346" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PythonProject$train_script.coverage" NAME="train_script Coverage Results" MODIFIED="1745058656382" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -212,8 +212,12 @@ class ImprovedCNN(nn.Module):
         self.cbam4 = CBAM(512)
         self.drop4 = DropBlock2D(drop_prob=0.1)
 
+        self.block5 = conv_block(512, 1024)
+        self.cbam5 = CBAM(1024)
+        self.drop5 = DropBlock2D(drop_prob=0.1)
+
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Linear(1024, num_classes)
 
     def forward(self, x):
         x = self.block1(x)
@@ -227,6 +231,9 @@ class ImprovedCNN(nn.Module):
 
         x = self.block4(x)
         x = self.apply_cbam_and_drop(x, 512)
+
+        x = self.block5(x)
+        x = self.apply_cbam_and_drop(x, 1024)
 
         x = self.pool(x)
         x = x.view(x.size(0), -1)
@@ -252,6 +259,11 @@ class ImprovedCNN(nn.Module):
             x = self.cbam4(x)
             if self.training:
                 x = self.drop4(x)
+        elif channels == 1024:
+            x = self.cbam5(x)
+            if self.training:
+                x = self.drop5(x)
+
 
         return x
 
@@ -369,7 +381,6 @@ def plot_confusion_matrix(conf_matrix, class_names, output_file):
 # --- Основной цикл ---
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print("Используемое устройство:", device)
     writer = SummaryWriter("runs/train_logs")
     # --- Информация о системе и параметрах ---
     print(f"\n🖥️ Используемое устройство: {device}")
@@ -413,10 +424,8 @@ def main(args):
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32).to(device)
     if args.loss == 'focal':
         criterion = FocalLoss(alpha=class_weights_tensor)
-        print("Используется Focal Loss")
     else:
         criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
-        print("Используется CrossEntropyLoss")
 
     optimizer = Adam(model.parameters(), lr=args.lr)
     scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=2)
@@ -466,14 +475,14 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_dir', type=Path, default=Path("C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/train"))
-    parser.add_argument('--val_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/val")
-    parser.add_argument('--check_dir', type=str, default="C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/check")
+    parser.add_argument('--val_dir', type=Path, default=Path("C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/val"))
+    parser.add_argument('--check_dir', type=Path, default=Path("C:/Users/Дмитрий/Desktop/ECOMMERCE_PRODUCT_IMAGES/check"))
     parser.add_argument('--model_path', type=str, default="best_model.pth")
     parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--epochs', type=int, default=60)
+    parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--loss', type=str, choices=['ce', 'focal'], default='focal')
-    parser.add_argument('--cutmix_prob', type=float, default=0.3)
+    parser.add_argument('--cutmix_prob', type=float, default=0.15)
     parser.add_argument('--patience', type=int, default=5, help='Patience для EarlyStopping')
     args = parser.parse_args()
 
